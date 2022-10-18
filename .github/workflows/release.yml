@@ -17,10 +17,6 @@ jobs:
         if: env.Change_Freeze != 'false'
         run: echo "Scheduled Releases can only be published during approved maintenance windows."
 
-      - name: Create New Release
-        if: env.Change_Freeze = 'false'
-        run: echo "Scheduled Releases can only be published during approved maintenance windows."
-
       - uses: rymndhng/release-on-push-action@master
         if: env.Change_Freeze = 'false'
         with:

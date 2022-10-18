@@ -4,7 +4,7 @@ on:
   push
 
 env:
-    Change_Freeze: true
+    Change_Freeze: false
 
 jobs:
   release-on-push:

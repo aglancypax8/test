@@ -2,8 +2,7 @@ name: Scheduled Trigger
 
 on:
   push:
-    branches:
-    - main
+
 jobs:
   release-on-push:
     runs-on: ubuntu-latest

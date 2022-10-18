@@ -3,14 +3,23 @@ name: Scheduled Release
 on:
   push:
 
+env:
+    Change_Freeze: true
+
 jobs:
   release-on-push:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+
+      - name: Set env 
+        if: env.Change_Freeze != 'false'
+        run: echo "Scheduled Releases can only be published during approved maintenance windows."
+
       - uses: rymndhng/release-on-push-action@master
         with:
           # increments the patch version by 1. e.g. 1.0.0 > 1.0.1
           bump_version_scheme: patch
           use_github_release_notes: true
+          

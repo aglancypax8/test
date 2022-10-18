@@ -3,14 +3,6 @@ name: Scheduled Release
 on:
   push:
 
-name: Scheduled Release
-
-on:
-  schedule:
-    # To update the schedule, navigate to https://crontab.guru/. Here you can easily set the parameters for when the schedule should run. 
-    # This is currently set to run at 4:00am every Tuesday.
-    - cron: '0 4 * * 2'
-
 env:
     Change_Freeze: false
 

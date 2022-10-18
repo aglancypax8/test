@@ -1,10 +1,9 @@
 name: Scheduled Trigger
 
 on:
-  schedule:
-    # Runs "Every 5 mins"
-    - cron: '5 * * * *'
-
+  push:
+    branches:
+    - main
 jobs:
   release-on-push:
     runs-on: ubuntu-latest

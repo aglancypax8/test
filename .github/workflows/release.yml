@@ -17,7 +17,8 @@ jobs:
         if: env.Change_Freeze != 'false'
         run: echo "Scheduled Releases can only be published during approved maintenance windows."
 
-      - uses: rymndhng/release-on-push-action@master
+      - id: release
+        uses: rymndhng/release-on-push-action@master
         if: env.Change_Freeze == 'false'
         with:
           # increments the patch version by 1. e.g. 1.0.0 > 1.0.1
@@ -28,4 +29,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_id: ${{ steps.release.outputs.tag_name }}
+          release_id: ${{ steps.release.outputs.version }}

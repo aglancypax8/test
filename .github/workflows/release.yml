@@ -29,25 +29,14 @@ jobs:
         run: |
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
-      
-      - name: Create Draft Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.release.outputs.tag_name }}
-          release_name: ${{ steps.create_release.outputs.id }}
-          draft: true
-          prerelease: false
 
       - uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./test-0.2.17.zip
-          asset_name: test-0.2.17.zip
+          upload_url: https://github.com/aglancypax8/test/archive/refs/tags
+          asset_path: ./v0.2.18.zip
+          asset_name: v0.2.18.zip
           asset_content_type: application/zip
 
       - uses: eregon/publish-release@v1

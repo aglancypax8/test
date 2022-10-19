@@ -22,10 +22,20 @@ jobs:
         if: env.Change_Freeze == 'false'
         with:
           # increments the patch version by 1. e.g. 1.0.0 > 1.0.1
-          bump_version_scheme: major
+          bump_version_scheme: patch
           use_github_release_notes: true
+          dry_run: true
       
       - name: Check Output Parameters
         run: |
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
+          echo "Got release url ${{ steps.release.outputs.upload_url  }}"
+
+      - uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }} 
+
+

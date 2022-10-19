@@ -46,12 +46,12 @@ jobs:
       #     prerelease: false
 
       - id: fetch-latest-release
-        uses: thebritican/fetch-latest-release@v1
+        uses: thebritican/fetch-latest-release@v2.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - id: publish
-        uses: eregon/publish-release@v2.0.0
+        uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

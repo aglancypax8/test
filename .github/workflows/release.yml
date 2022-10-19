@@ -29,21 +29,6 @@ jobs:
         run: |
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
-          echo "Got release url ${{ steps.release.outputs.upload_url  }}"
 
-      - uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: https://github.com/aglancypax8/test/archive/refs/tags/v0.2.18.zip
-          asset_path: ./test-0.2.18.zip
-          asset_name: test-0.2.18.zip
-          asset_content_type: application/zip
-
-      - uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ steps.create_release.outputs.id }} 
-
-
+      - name: Publish a Release
+        uses: StuYarrow/publish-release@v1.0.2

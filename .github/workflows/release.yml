@@ -35,8 +35,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: https://github.com/aglancypax8/test/archive/refs/tags/v0.2.18.zip
-          asset_path: ./v0.2.18.zip
-          asset_name: v0.2.18.zip
+          asset_path: ./test-0.2.18
+          asset_name: test-0.2.18
           asset_content_type: application/zip
 
       - uses: eregon/publish-release@v1
@@ -44,5 +44,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           release_id: ${{ steps.create_release.outputs.id }} 
-          
+
 

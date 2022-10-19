@@ -25,8 +25,15 @@ jobs:
           bump_version_scheme: minor
           use_github_release_notes: true
       
-      - name: Check Output Parameters
+      - id: outputs
+        name: Check Output Parameters
         run: |
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
 
+      - id: publish
+        uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.release.outputs.version }}

@@ -17,22 +17,22 @@ jobs:
         if: env.Change_Freeze != 'false'
         run: echo "Scheduled Releases can only be published during approved maintenance windows."
 
-      - id: release
-        uses: rymndhng/release-on-push-action@master
-        if: env.Change_Freeze == 'false'
-        with:
-          # increments the patch version by 1. e.g. 1.0.0 > 1.0.1
-          bump_version_scheme: patch
-          use_github_release_notes: true
-          #tag_prefix: ""
-          #release_name: "v<RELEASE_VERSION>"
-          dry-run: true
+      # - id: release
+      #   uses: rymndhng/release-on-push-action@master
+      #   if: env.Change_Freeze == 'false'
+      #   with:
+      #     # increments the patch version by 1. e.g. 1.0.0 > 1.0.1
+      #     bump_version_scheme: patch
+      #     use_github_release_notes: true
+      #     #tag_prefix: ""
+      #     #release_name: "v<RELEASE_VERSION>"
+      #     dry-run: true
       
-      - id: outputs
-        name: Check Output Parameters
-        run: |
-          echo "Got tag name ${{ steps.release.outputs.tag_name }}"
-          echo "Got release version ${{ steps.release.outputs.version }}"
+      # - id: outputs
+      #   name: Check Output Parameters
+      #   run: |
+      #     echo "Got tag name ${{ steps.release.outputs.tag_name }}"
+      #     echo "Got release version ${{ steps.release.outputs.version }}"
 
       - name: Create Draft Release
         id: create_release
@@ -40,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.release.outputs.tag_name }}
-          release_name: ${{ steps.release.outputs.version }}
+          tag_name: "v2.3.7" #${{ steps.release.outputs.tag_name }}
+          release_name: "2.3.7" #${{ steps.release.outputs.version }}
           draft: true
           prerelease: false
 

@@ -1,7 +1,7 @@
 name: Scheduled Release
 
-on:
-  push
+# on:
+#   push
 
 env:
     Change_Freeze: false

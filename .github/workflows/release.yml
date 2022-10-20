@@ -39,9 +39,8 @@ jobs:
       - id: publish
         uses: eregon/publish-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.pat }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
           release_id: ${{ steps.fetch-latest-release.outputs.id }}
-          repository: aglancypax8/test
-          token: ${{ secrets.pat }}
+          
 

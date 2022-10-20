@@ -7,7 +7,7 @@ env:
     Change_Freeze: false
 
 jobs:
-  release-on-push:
+  Release:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,6 +36,12 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  Publish:
+    needs: Release
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
       - id: publish
         uses: eregon/publish-release@v1
         

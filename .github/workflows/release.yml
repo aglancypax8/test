@@ -32,17 +32,18 @@ jobs:
           echo "Got tag name ${{ steps.release.outputs.tag_name }}"
           echo "Got release version ${{ steps.release.outputs.version }}"
 
-      - id: fetch-latest-release
-        uses: thebritican/fetch-latest-release@v2.0.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   Publish:
     needs: Release
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+    
+      - id: fetch-latest-release
+        uses: thebritican/fetch-latest-release@v2.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - id: publish
         uses: eregon/publish-release@v1
         

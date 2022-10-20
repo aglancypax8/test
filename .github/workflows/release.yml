@@ -39,6 +39,6 @@ jobs:
       - id: publish
         uses: eregon/publish-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.pat }}
         with:
           release_id: ${{ steps.fetch-latest-release.outputs.id }}

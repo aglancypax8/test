@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-        GITHUB_TOKEN: ${{ secrets.Actions }}
+        GITHUB_TOKEN: ${{ secrets.actions }}
     steps:
     - name: Trigger echo
       run: echo "test"

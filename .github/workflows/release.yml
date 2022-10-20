@@ -10,7 +10,7 @@ jobs:
   release-on-push:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.secrets.actions }}
     steps:
 
       - name: Change Freeze Implemented 
@@ -34,11 +34,11 @@ jobs:
       - id: fetch-latest-release
         uses: thebritican/fetch-latest-release@v2.0.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.secrets.actions }}
 
       - id: publish
         uses: eregon/publish-release@v1
         
         with:
           release_id: ${{ steps.fetch-latest-release.outputs.id }}
-          github_token: ${{ secrets.actions }}
+          GITHUB_TOKEN: ${{ secrets.actions }}

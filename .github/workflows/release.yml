@@ -41,7 +41,6 @@ jobs:
         
         with:
           release_id: ${{ steps.fetch-latest-release.outputs.id }}
-          with:
           repository: aglancypax8/test
           token: ${{ secrets.release }}
 

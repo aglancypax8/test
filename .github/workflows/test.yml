@@ -1,0 +1,12 @@
+on:
+  push
+
+jobs:
+  release-on-push:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.Actions }}
+    steps:
+
+      - name: Trigger echo
+        run: echo "test."

@@ -1,36 +1,146 @@
-name: Create Release and Publish
-
-# Trigger the create release workflow
+name: CRuby Dev Builds
 on:
-  push
-
+  push:
+    tags:
+    - '*'
+  schedule:
+  - cron: '0 19 * * *'
 jobs:
   release:
-    name: Create Release
+    name: Create GitHub Release
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-  publish-gpr:
-    needs: release # After release is created then run the second workflow
-    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v3
       with:
-        node-version: 16
-    - run: npm ci
-    - run: npm test
+        fetch-depth: 0
+      if: github.event_name == 'schedule'
+    - name: Create tag
+      id: create_tag
+      run: |
+        if [[ "${{ github.event_name }}" == "schedule" ]]; then
+          tag=v$(date +%Y%m%d.%H%M%S)
+        else
+          tag=$(basename "${{ github.ref }}")
+        fi
+        echo "::set-output name=tag::$tag"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.create_tag.outputs.tag }}
+        release_name: ${{ steps.create_tag.outputs.tag }}
+        draft: true
+        prerelease: false
 
+  build:
+    needs: [release]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, macos-10.15 ]
+        name: [ head, debug ]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Set platform
+      id: platform
+      run: |
+        platform=${{ matrix.os }}
+        platform=${platform/macos-*/macos-latest}
+        echo "::set-output name=platform::$platform"
 
+    - name: apt-get update on Ubuntu
+      run: sudo apt-get update
+      if: startsWith(matrix.os, 'ubuntu')
+    - run: sudo apt-get install -y --no-install-recommends ruby bison libyaml-dev libgdbm-dev libreadline-dev libncurses5-dev
+      if: startsWith(matrix.os, 'ubuntu')
+    - run: brew install autoconf automake
+      if: startsWith(matrix.os, 'macos')
+    - name: Disable Firewall # Needed for TestSocket#test_udp_server in test-all
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+
+    - name: Clone Ruby
+      uses: actions/checkout@v2
+      with:
+        repository: ruby/ruby
+
+    # ENABLE_PATH_CHECK=0: https://github.com/actions/virtual-environments/issues/267
+    - name: Set configure flags (head)
+      run: |
+        echo "cppflags=-DENABLE_PATH_CHECK=0" >> $GITHUB_ENV
+      if: matrix.name == 'head'
+    - name: Set configure flags (debug)
+      run: |
+        echo "cppflags=-DENABLE_PATH_CHECK=0 -DRUBY_DEBUG=1" >> $GITHUB_ENV
+        echo "optflags=-O3 -fno-inline" >> $GITHUB_ENV
+      if: matrix.name == 'debug'
+
+    # Build
+    - run: chmod 755 $HOME # https://github.com/actions/virtual-environments/issues/267
+    - run: mkdir -p ~/.rubies
+    - run: ./autogen.sh
+    - run: ./configure --prefix=$HOME/.rubies/ruby-${{ matrix.name }} --enable-shared --disable-install-doc --enable-yjit
+      if: startsWith(matrix.os, 'ubuntu')
+    - run: ./configure --prefix=$HOME/.rubies/ruby-${{ matrix.name }} --enable-shared --disable-install-doc --enable-yjit --with-openssl-dir=$(brew --prefix openssl@1.1) --with-readline-dir=$(brew --prefix readline)
+      if: startsWith(matrix.os, 'macos')
+    - run: make -j4
+    - run: make install
+
+    - name: Create archive
+      run: tar czf ruby-${{ matrix.name }}-${{ steps.platform.outputs.platform }}.tar.gz -C ~/.rubies ruby-${{ matrix.name }}
+
+    # Test
+    - run: make test-spec MSPECOPT=-j
+    - run: make test-all TESTS="-j4"
+
+    - run: echo "$HOME/.rubies/ruby-${{ matrix.name }}/bin" >> $GITHUB_PATH
+    - uses: actions/checkout@v2
+      with:
+        path: test_files
+    - run: mv test_files/Gemfile .
+    - run: ruby --version
+    - run: ruby -e 'pp RbConfig::CONFIG'
+    - run: ruby --yjit -e 'exit RubyVM::YJIT.enabled?'
+    - run: gem --version
+    - run: rake --version
+    - run: ruby -ropen-uri -e 'puts URI.send(:open, "https://rubygems.org/") { |f| f.read(1024) }'
+    - run: gem install json:2.2.0 --no-document
+    - run: bundle --version
+    - run: bundle install
+    - run: bundle exec rake --version
+    - name: Subprocess test
+      run: ruby -e 'p RbConfig::CONFIG["cppflags"]; def Warning.warn(s); raise s; end; system RbConfig.ruby, "-e", "p :OK"'
+
+    - name: Upload Built Ruby
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.release.outputs.upload_url }}
+        asset_path: ruby-${{ matrix.name }}-${{ steps.platform.outputs.platform }}.tar.gz
+        asset_name: ruby-${{ matrix.name }}-${{ steps.platform.outputs.platform }}.tar.gz
+        asset_content_type: application/gzip
+
+  metadata:
+    name: Publish Release
+    needs: [release, build]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: eregon/publish-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_id: ${{ needs.release.outputs.release_id }}
+    - uses: eregon/keep-last-n-releases@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        n: 3
+        remove_tags_without_release: true

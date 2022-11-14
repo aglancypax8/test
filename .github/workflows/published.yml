@@ -26,4 +26,10 @@ jobs:
           echo "CLIENT=standard" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=eu-west-1" >> $GITHUB_ENV
           echo "AWS_SG_ID=sg-0e5c105a5f7ad1e6e" >> $GITHUB_ENV
+          
+      - name: Jenkins Job Run
+        uses: toptal/jenkins-job-trigger-action@master
+        with:
+              "Tag": "${{ env.TAG }}"
+            
         

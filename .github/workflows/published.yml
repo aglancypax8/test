@@ -16,16 +16,10 @@ jobs:
       - name: Trigger echo
         run: echo "A new release has been published."
         
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-      - name: Test
-        run: |
-          echo $RELEASE_VERSION
-          echo ${{ env.RELEASE_VERSION }}
+      - id: fetch-latest-release
+        uses: thebritican/fetch-latest-release@v2.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   DeployProd:
     name: Trigger Jenkins Job on Prod
